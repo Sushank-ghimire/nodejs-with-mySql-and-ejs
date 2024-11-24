@@ -1,5 +1,8 @@
 import connection from "../utils/DbConnect.js";
-import argon2 from "argon2";
+import bcrypt from "bcryptjs";
+import { configDotenv } from "dotenv";
+import jwt from "jsonwebtoken";
+configDotenv();
 
 const handleLogin = async (req, res, next) => {
   try {
@@ -7,9 +10,8 @@ const handleLogin = async (req, res, next) => {
 
     // Check if email and password are provided
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Email and password are required." });
+      const error = "Email and password are required.";
+      return res.render("Error", { error });
     }
 
     // Query to fetch the user by email
@@ -17,30 +19,39 @@ const handleLogin = async (req, res, next) => {
     connection.query(query, [email], async (err, results) => {
       if (err) {
         console.error("Database Error:", err);
-        return res
-          .status(500)
-          .json({ error: "An error occurred while logging in." });
+        const error = "An error occurred while logging in.";
+        return res.status(500).render("Error", { error });
       }
 
       if (results.length === 0) {
-        return res.status(401).json({ error: "Invalid email or password." });
+        res.status(401).render("Error", { error: "User not registered" });
       }
 
       const user = results[0];
+      const userPassword = user.password;
       try {
-        const isPasswordValid = await argon2.verify(user.password, password);
+        const isPasswordValid = await bcrypt.compare(password, userPassword);
 
         if (!isPasswordValid) {
-          return res.status(401).json({ error: "Invalid email or password." });
+          const error = "Invalid email or password.";
+          return res.status(401).render("Error", { error });
         }
 
-        const token = generateToken(user.email);
-        res.status(200).json({
-          message: "Login successful.",
+        const token = await generateToken(user);
+
+        // Set the cookie with the token
+        res.cookie("userToken", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 24 * 60 * 60 * 1000,
+          sameSite: "strict",
         });
+        return res.redirect("/create");
       } catch (verificationError) {
         console.error("Password Verification Error:", verificationError);
-        return res.status(500).json({ error: "Password verification failed." });
+        return res
+          .status(500)
+          .render("Error", { error: "Password verification failed." });
       }
     });
   } catch (error) {
@@ -50,7 +61,19 @@ const handleLogin = async (req, res, next) => {
   }
 };
 
-const generateToken = async (email) => {};
+const generateToken = async (user) => {
+  try {
+    const jwtSecret = process.env.JWT_SECRET_TOKEN;
+
+    const userData = { email: user.email, userId: user.id };
+    const token = await jwt.sign(userData, jwtSecret, {
+      expiresIn: "1d",
+    });
+    return token;
+  } catch (error) {
+    throw Error("Error while generating token.");
+  }
+};
 
 const handleRegister = async (req, res, next) => {
   try {
@@ -75,7 +98,7 @@ const handleRegister = async (req, res, next) => {
       }
 
       // Hash the password
-      const hashedPassword = await argon2.hash(password);
+      const hashedPassword = await bcrypt.hash(password, 5);
 
       // Insert the new user into the database
       const queryToInsert =
@@ -85,10 +108,14 @@ const handleRegister = async (req, res, next) => {
       connection.query(queryToInsert, values, (err, results) => {
         if (err) {
           console.error("Database Error:", err);
-          return res.status(500).json({ error: "Failed to register user." });
+          return res
+            .status(500)
+            .render("Error", { error: "Failed to register user." });
         }
 
-        res.status(201).json({ message: "User registered successfully." });
+        res
+          .status(201)
+          .render("Error", { error: "User registered successfully." });
       });
     });
   } catch (error) {

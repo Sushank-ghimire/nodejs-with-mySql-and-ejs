@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import noteRoutes from "./routes/notes.route.js";
 import userRoutes from "./routes/user.routes.js";
+import { authenticateUser } from "./middlewares/Auth.middleware.js";
 configDotenv();
 
 const notes = [
@@ -32,10 +33,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((err, req, res) => {
-  if (err) {
-    throw Error("Error occured : ", err);
+app.use((err, req, res, next) => {
+  if (err.name === "ValidationError") {
+    return res
+      .status(400)
+      .json({ error: "Validation failed", details: err.message });
   }
+  res.status(500).json({ error: "Internal server error" });
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,7 +48,7 @@ const __dirname = path.dirname(__filename);
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/notes", (req, res) => {
+app.get("/notes", authenticateUser, (req, res) => {
   res.render("notes", { notes });
 });
 
