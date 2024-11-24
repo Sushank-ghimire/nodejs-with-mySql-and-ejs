@@ -1,0 +1,96 @@
+<%- include("./partials/header", { title: "Edit Note - Notes App" }) %>
+<body class="bg-gradient-to-b from-indigo-100 to-indigo-300 min-h-screen">
+  <%- include("./partials/navbar") %>
+
+  <main class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Page Header -->
+    <h1 class="text-3xl font-bold text-indigo-700 text-center mb-8">
+      Edit Your Note
+    </h1>
+
+    <!-- Edit Note Form -->
+    <form
+      action="/notes/<%= note.id %>?_method=PUT"
+      method="POST"
+      class="bg-white shadow-md rounded-lg p-6"
+    >
+      <!-- Note Title -->
+      <div class="mb-6">
+        <label for="title" class="block text-lg font-semibold text-gray-700">
+          Title
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          value="<%= note.title %>"
+          required
+          class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Note Content -->
+      <div class="mb-6">
+        <label for="content" class="block text-lg font-semibold text-gray-700">
+          Content
+        </label>
+        <textarea
+          id="content"
+          name="content"
+          rows="6"
+          required
+          class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+        >
+<%= note.content %></textarea
+        >
+      </div>
+
+      <!-- Color Picker -->
+      <div class="mb-6">
+        <label for="color" class="block text-lg font-semibold text-gray-700">
+          Choose Color
+        </label>
+        <div class="flex gap-4 mt-2">
+          <label>
+            <input type="radio" name="color" value="bg-red-100" <%= note.color
+            === "bg-red-100" ? "checked" : "" %> class="hidden" />
+            <div
+              class="w-8 h-8 rounded-full bg-red-100 border-2 border-transparent hover:border-gray-500 cursor-pointer"
+            ></div>
+          </label>
+          <label>
+            <input type="radio" name="color" value="bg-blue-100" <%= note.color
+            === "bg-blue-100" ? "checked" : "" %> class="hidden" />
+            <div
+              class="w-8 h-8 rounded-full bg-blue-100 border-2 border-transparent hover:border-gray-500 cursor-pointer"
+            ></div>
+          </label>
+          <label>
+            <input type="radio" name="color" value="bg-green-100" <%= note.color
+            === "bg-green-100" ? "checked" : "" %> class="hidden" />
+            <div
+              class="w-8 h-8 rounded-full bg-green-100 border-2 border-transparent hover:border-gray-500 cursor-pointer"
+            ></div>
+          </label>
+          <label>
+            <input type="radio" name="color" value="bg-yellow-100" <%=
+            note.color === "bg-yellow-100" ? "checked" : "" %> class="hidden" />
+            <div
+              class="w-8 h-8 rounded-full bg-yellow-100 border-2 border-transparent hover:border-gray-500 cursor-pointer"
+            ></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-center">
+        <button
+          type="submit"
+          class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </main>
+</body>

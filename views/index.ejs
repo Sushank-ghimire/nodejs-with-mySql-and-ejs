@@ -1,0 +1,101 @@
+<%- include("./partials/header", { title: "Notes App - Simplify Your Notes" })
+%>
+<body class="bg-gradient-to-b from-indigo-100 to-indigo-300 min-h-screen">
+  <%- include("./partials/navbar") %>
+
+  <!-- Hero Section -->
+  <section
+    class="flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto px-6 py-12"
+  >
+    <!-- Text Content -->
+    <div class="lg:w-1/2 text-center lg:text-left">
+      <h1 class="text-4xl lg:text-6xl font-bold text-indigo-700">
+        Simplify Your Notes
+      </h1>
+      <p class="mt-4 text-lg text-gray-700">
+        Organize your thoughts, ideas, and tasks in one place with our modern,
+        easy-to-use Notes App.
+      </p>
+      <div
+        class="mt-6 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+      >
+        <a
+          href="/register"
+          class="bg-indigo-600 text-white px-6 py-3 rounded-md text-lg shadow-md hover:bg-indigo-700 transition"
+        >
+          Get Started
+        </a>
+        <a
+          href="/login"
+          class="bg-white text-indigo-600 border border-indigo-600 px-6 py-3 rounded-md text-lg shadow-md hover:bg-indigo-100 transition"
+        >
+          Login
+        </a>
+      </div>
+    </div>
+
+    <!-- Image -->
+    <div class="mt-8 lg:mt-0 lg:w-1/2">
+      <img
+        src="https://via.placeholder.com/500"
+        alt="Notes App Illustration"
+        class="w-full max-w-lg mx-auto"
+      />
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="bg-white py-12">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-center text-indigo-700">
+        Why Choose Notes App?
+      </h2>
+      <p class="mt-2 text-center text-gray-600">
+        A simple yet powerful app to help you organize your life.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+        <!-- Feature 1 -->
+        <div class="bg-indigo-100 rounded-lg p-6 text-center shadow-md">
+          <h3 class="text-xl font-semibold text-indigo-700">Fast and Secure</h3>
+          <p class="text-gray-600 mt-3">
+            Save and access your notes instantly with top-notch security.
+          </p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="bg-indigo-100 rounded-lg p-6 text-center shadow-md">
+          <h3 class="text-xl font-semibold text-indigo-700">
+            Customizable Notes
+          </h3>
+          <p class="text-gray-600 mt-3">
+            Choose colors, organize by categories, and make your notes your own.
+          </p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="bg-indigo-100 rounded-lg p-6 text-center shadow-md">
+          <h3 class="text-xl font-semibold text-indigo-700">
+            Accessible Anywhere
+          </h3>
+          <p class="text-gray-600 mt-3">
+            Use the app on any device, anytime, anywhere.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="bg-indigo-600 py-12">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl font-bold text-white">Start Taking Notes Today</h2>
+      <p class="text-indigo-200 mt-4">
+        Sign up now and experience the easiest way to organize your life.
+      </p>
+      <a
+        href="/register"
+        class="inline-block mt-6 bg-white text-indigo-600 px-8 py-3 rounded-md text-lg font-semibold shadow-md hover:bg-gray-100 transition"
+      >
+        Get Started for Free
+      </a>
+    </div>
+  </section>
+</body>
