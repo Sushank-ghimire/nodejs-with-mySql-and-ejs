@@ -8,38 +8,36 @@ const handleLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Check if email and password are provided
     if (!email || !password) {
-      const error = "Email and password are required.";
-      return res.render("Error", { error });
+      return res.render("login", { error: "Email and password are required." });
     }
 
-    // Query to fetch the user by email
     const query = "SELECT * FROM users WHERE email=?";
     connection.query(query, [email], async (err, results) => {
       if (err) {
         console.error("Database Error:", err);
-        const error = "An error occurred while logging in.";
-        return res.status(500).render("Error", { error });
+        return next(err); // Pass error to next middleware
       }
 
       if (results.length === 0) {
-        res.status(401).render("Error", { error: "User not registered" });
+        return res
+          .status(401)
+          .render("login", { error: "User not registered" });
       }
 
       const user = results[0];
-      const userPassword = user.password;
       try {
-        const isPasswordValid = await bcrypt.compare(password, userPassword);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-          const error = "Invalid email or password.";
-          return res.status(401).render("Error", { error });
+          return res.render("login", {
+            error: "Invalid email or password.",
+            email: req.body.email,
+            password: req.body.password,
+          });
         }
-
         const token = await generateToken(user);
 
-        // Set the cookie with the token
         res.cookie("userToken", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -56,8 +54,7 @@ const handleLogin = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Login Error:", error);
-    res.status(500).json({ error: "An error occurred while logging in." });
-    next(error);
+    next(error); // Pass error to next middleware
   }
 };
 
@@ -65,13 +62,20 @@ const generateToken = async (user) => {
   try {
     const jwtSecret = process.env.JWT_SECRET_TOKEN;
 
-    const userData = { email: user.email, userId: user.id };
-    const token = await jwt.sign(userData, jwtSecret, {
+    if (!jwtSecret) {
+      throw new Error(
+        "JWT_SECRET_TOKEN is not defined in the environment variables."
+      );
+    }
+
+    const userData = { email: user.email, userName: user.name };
+    const token = await jwt.sign({ userData }, jwtSecret, {
       expiresIn: "1d",
     });
     return token;
   } catch (error) {
-    throw Error("Error while generating token.");
+    console.error("Error while generating token:", error.message); // Debug log
+    throw new Error("Error while generating token.");
   }
 };
 
@@ -113,9 +117,7 @@ const handleRegister = async (req, res, next) => {
             .render("Error", { error: "Failed to register user." });
         }
 
-        res
-          .status(201)
-          .render("Error", { error: "User registered successfully." });
+        return res.status(201).redirect("/login");
       });
     });
   } catch (error) {
@@ -127,4 +129,17 @@ const handleRegister = async (req, res, next) => {
   }
 };
 
-export { handleLogin, handleRegister };
+const handleLogout = async (req, res, next) => {
+  try {
+    res.clearCookie("userToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.redirect("/");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { handleLogin, handleRegister, handleLogout };

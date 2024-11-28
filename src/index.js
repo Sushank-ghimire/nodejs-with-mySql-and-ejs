@@ -5,6 +5,9 @@ import { fileURLToPath } from "url";
 import noteRoutes from "./routes/notes.route.js";
 import userRoutes from "./routes/user.routes.js";
 import { authenticateUser } from "./middlewares/Auth.middleware.js";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
+
 configDotenv();
 
 const notes = [
@@ -29,17 +32,28 @@ const notes = [
     content: "Build a note-taking app with CRUD features.",
   },
 ];
+
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((err, req, res, next) => {
-  if (err.name === "ValidationError") {
-    return res
-      .status(400)
-      .json({ error: "Validation failed", details: err.message });
+app.use((req, res, next) => {
+  const token = req.cookies.userToken;
+  if (token) {
+    try {
+      const jwtSecret = process.env.JWT_SECRET_TOKEN;
+      const user = jwt.verify(token, jwtSecret);
+
+      res.locals.user = user;
+    } catch (error) {
+      console.error("Invalid token:", error.message);
+      res.locals.user = null;
+    }
+  } else {
+    res.locals.user = null;
   }
-  res.status(500).json({ error: "Internal server error" });
+  next();
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -48,7 +62,7 @@ const __dirname = path.dirname(__filename);
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/notes", authenticateUser, (req, res) => {
+app.get("/notes", authenticateUser, async (req, res) => {
   res.render("notes", { notes });
 });
 
@@ -61,14 +75,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  res.render("login", { error: null });
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  res.render("register", { error: null });
 });
 
-app.get("/create", (req, res) => {
+app.get("/create", authenticateUser, async (req, res) => {
   res.render("create");
 });
 
